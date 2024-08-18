@@ -1,6 +1,6 @@
 <?php
 
-namespace NFePHP\DA\NFe\Traits;
+namespace NFePHP\DA\NFe\Traits2;
 
 /**
  * Bloco Informações sobre impostos aproximados
@@ -46,70 +46,69 @@ trait TraitBlocoIX
         );
 
 
-        if ($this->tpEmis != 9) {
-            $texto = getenv("APP_NAME");
-            $aFont = ['font'=> $this->fontePadrao, 'size' => 9, 'style' => 'b'];
-            $this->pdf->textBox(
-                $this->margem,
-                $y+5,
-                $this->wPrint,
-                $this->bloco9H,
-                $texto,
-                $aFont,
-                'T',
-                'C',
-                false,
-                '',
-                true
-            );
 
-            $texto = getenv("APP_DESC");
-            $aFont = ['font'=> $this->fontePadrao, 'size' => 9, 'style' => 'b'];
-            $this->pdf->textBox(
-                $this->margem,
-                $y+8,
-                $this->wPrint,
-                $this->bloco9H,
-                $texto,
-                $aFont,
-                'T',
-                'C',
-                false,
-                '',
-                true
-            );
-            
-            $texto = "Telefone: " . getenv("CONTATO_SUPORTE");
-            $aFont = ['font'=> $this->fontePadrao, 'size' => 9, 'style' => 'b'];
-            $this->pdf->textBox(
-                $this->margem,
-                $y+11,
-                $this->wPrint,
-                $this->bloco9H,
-                $texto,
-                $aFont,
-                'T',
-                'C',
-                false,
-                '',
-                true
-            );
-            $texto = getenv("SITE_SUPORTE");
-            $aFont = ['font'=> $this->fontePadrao, 'size' => 9, 'style' => 'b'];
-            $this->pdf->textBox(
-                $this->margem,
-                $y+14,
-                $this->wPrint,
-                $this->bloco9H,
-                $texto,
-                $aFont,
-                'T',
-                'C',
-                false,
-                '',
-                true
-            );
-        }
+        $texto = getenv("APP_NAME");
+        $aFont = ['font'=> $this->fontePadrao, 'size' => 9, 'style' => 'b'];
+        $this->pdf->textBox(
+            $this->margem,
+            $y+5,
+            $this->wPrint,
+            $this->bloco9H,
+            $texto,
+            $aFont,
+            'T',
+            'C',
+            false,
+            '',
+            true
+        );
+
+        $texto = getenv("APP_DESC");
+        $aFont = ['font'=> $this->fontePadrao, 'size' => 9, 'style' => 'b'];
+        $this->pdf->textBox(
+            $this->margem,
+            $y+8,
+            $this->wPrint,
+            $this->bloco9H,
+            $texto,
+            $aFont,
+            'T',
+            'C',
+            false,
+            '',
+            true
+        );
+        
+        $texto = "Telefone: " . getenv("CONTATO_SUPORTE");
+        $aFont = ['font'=> $this->fontePadrao, 'size' => 9, 'style' => 'b'];
+        $this->pdf->textBox(
+            $this->margem,
+            $y+11,
+            $this->wPrint,
+            $this->bloco9H,
+            $texto,
+            $aFont,
+            'T',
+            'C',
+            false,
+            '',
+            true
+        );
+        $texto = getenv("SITE_SUPORTE");
+        $aFont = ['font'=> $this->fontePadrao, 'size' => 9, 'style' => 'b'];
+        $this->pdf->textBox(
+            $this->margem,
+            $y+14,
+            $this->wPrint,
+            $this->bloco9H,
+            $texto,
+            $aFont,
+            'T',
+            'C',
+            false,
+            '',
+            true
+        );
         return $this->bloco9H + $y;
     }
     
@@ -132,7 +131,9 @@ trait TraitBlocoIX
             $fsize = 5;
             $aFont = ['font'=> $this->fontePadrao, 'size' => 5, 'style' => ''];
         }
+
         $linhas = str_replace(';', "\n", $this->infCpl);
+
         $hfont = (imagefontheight($fsize)/72)*13;
         $numlinhas = $pdf->getNumLines($linhas, $wprint, $aFont)+2;
         return (int) ($numlinhas * $hfont) + 2;

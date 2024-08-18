@@ -1,6 +1,6 @@
 <?php
 
-namespace NFePHP\DA\NFe\Traits;
+namespace NFePHP\DA\NFe\Traits2;
 
 /**
  * Bloco Informações sobre impostos aproximados

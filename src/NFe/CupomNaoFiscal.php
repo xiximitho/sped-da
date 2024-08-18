@@ -20,12 +20,13 @@ use NFePHP\DA\Legacy\Dom;
 use NFePHP\DA\Legacy\Pdf;
 use NFePHP\DA\Common\DaCommon;
 use Com\Tecnick\Barcode\Barcode;
+use App\Models\Filial;
 
-class Danfce extends DaCommon
+class CupomNaoFiscal extends DaCommon
 {
     protected $papel;
     protected $paperwidth = 80;
-    protected $descPercent = 0.38;
+    protected $descPercent = 0.48;
     protected $xml; // string XML NFe
     protected $dom;
     protected $logomarca=''; // path para logomarca em jpg
@@ -79,17 +80,18 @@ class Danfce extends DaCommon
     protected $bloco9H = 4.0; //informações sobre tributos
     protected $bloco10H = 5.0; //informações do integrador
     protected $venda = null;
+    protected $config = null;
 
-    use Traits\TraitBlocoI;
-    use Traits\TraitBlocoII;
-    use Traits\TraitBlocoIII;
-    use Traits\TraitBlocoIV;
-    use Traits\TraitBlocoV;
-    use Traits\TraitBlocoVI;
-    use Traits\TraitBlocoVII;
-    use Traits\TraitBlocoVIII;
-    use Traits\TraitBlocoIX;
-    use Traits\TraitBlocoX;
+    use Traits2\TraitBlocoI;
+    use Traits2\TraitBlocoII;
+    use Traits2\TraitBlocoIII;
+    use Traits2\TraitBlocoIV;
+    use Traits2\TraitBlocoV;
+    use Traits2\TraitBlocoVI;
+    use Traits2\TraitBlocoVII;
+    use Traits2\TraitBlocoVIII;
+    use Traits2\TraitBlocoIX;
+    use Traits2\TraitBlocoX;
 
     /**
      * Construtor
@@ -98,15 +100,16 @@ class Danfce extends DaCommon
      *
      * @throws Exception
      */
-    public function __construct($xml, $venda)
-    {
-        $this->xml = $xml;
-        if (empty($xml)) {
-            throw new \Exception('Um xml de NFCe deve ser passado ao construtor da classe.');
-        }
-        //carrega dados do xml
-        $this->loadXml();
+    public function __construct($venda = '', $config = null) {
+        $this->config = $config;
         $this->venda = $venda;
+
+        if($this->venda->filial_id > 0){
+            $this->config = Filial::where('id', $this->venda->filial_id)->first();
+        }
+
+
+        //carrega dados do xml
     }
 
     /**
@@ -204,6 +207,7 @@ class Danfce extends DaCommon
         if (!empty($logo)) {
             $this->logomarca = $this->adjustImage($logo, true);
         }
+
         $tamPapelVert = $this->calculatePaperLength();
         $this->orientacao = 'P';
         $this->papel = [$this->paperwidth, $tamPapelVert];
@@ -229,6 +233,7 @@ class Danfce extends DaCommon
         //superior e inferior
         $this->hPrint = $maxH-$margSup-$margInf;
         // estabelece contagem de paginas
+
         $this->pdf->aliasNbPages();
         $this->pdf->setMargins($margEsq, $margSup); // fixa as margens
         $this->pdf->setDrawColor(0, 0, 0);
@@ -238,18 +243,18 @@ class Danfce extends DaCommon
         $this->pdf->setLineWidth(0.1); // define a largura da linha
         $this->pdf->setTextColor(0, 0, 0);
 
-        $y = $this->blocoI(); //cabecalho
+        $y = $this->blocoI($this->config); //cabecalho
         $y = $this->blocoII($y); //informação cabeçalho fiscal e contingência
         
-        $y = $this->blocoIII($y); //informação dos itens
-        $y = $this->blocoIV($y); //informação sobre os totais
-        $y = $this->blocoV($y); //informação sobre pagamento
+        $y = $this->blocoIII($y, $this->venda); //informação dos itens
+        $y = $this->blocoIV($y, $this->venda); //informação sobre os totais
+        $y = $this->blocoV($y, $this->venda); //informação sobre pagamento
         
-        $y = $this->blocoVI($y); //informações sobre consulta pela chave
-        $y = $this->blocoVII($y); //informações sobre o consumidor e dados da NFCe
-        $y = $this->blocoVIII($y, $this->venda); //QRCODE
-        $y = $this->blocoIX($y); //informações complementares e sobre tributos
-        $y = $this->blocoX($y); //creditos
+        // $y = $this->blocoVI($y); //informações sobre consulta pela chave
+        // $y = $this->blocoVII($y); //informações sobre o consumidor e dados da NFCe
+        // $y = $this->blocoVIII($y, $this->venda); //QRCODE
+        // $y = $this->blocoIX($y); //informações complementares e sobre tributos
+        // $y = $this->blocoX($y); //creditos
         
         $ymark = $maxH/4;
         if ($this->tpAmb == 2) {
@@ -348,14 +353,13 @@ class Danfce extends DaCommon
     private function calculatePaperLength()
     {
         $wprint = $this->paperwidth - (2 * $this->margem);
-        $this->bloco3H = $this->calculateHeightItens($wprint * $this->descPercent);
-        $this->bloco5H = $this->calculateHeightPag();
+        $this->bloco3H = $this->calculateHeightItens($wprint * $this->descPercent, $this->venda->itens);
+        $this->bloco5H = $this->calculateHeightPag($this->venda->fatura);
         $this->bloco9H = $this->calculateHeighBlokIX();
-
         if($this->venda->tipo_pagamento == 17 && $this->venda->qr_code_base64 != ""){
             $this->bloco8H += 60;
         }
-        
+
         $length = $this->bloco1H //cabecalho
             + $this->bloco2H //informação fiscal
             + $this->bloco3H //itens

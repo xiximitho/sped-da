@@ -1,31 +1,34 @@
 <?php
 
-namespace NFePHP\DA\NFe\Traits;
+namespace NFePHP\DA\NFe\Traits2;
 
 /**
  * Bloco forma de pagamento
  */
 trait TraitBlocoV
 {
-    protected function blocoV($y)
+    protected function blocoV($y, $venda)
     {
         $this->bloco5H = $this->calculateHeightPag();
-
         $aFont = ['font'=> $this->fontePadrao, 'size' => 7, 'style' => ''];
         //$this->pdf->textBox($this->margem, $y, $this->wPrint, $this->bloco5H, '', $aFont, 'T', 'C', true, '', false);
         $arpgto = [];
-        if ($this->pag->length > 0) {
-            foreach ($this->pag as $pgto) {
-                $tipo = $this->pagType((int) $this->getTagValue($pgto, 'tPag'));
-                $valor = number_format((float) $this->getTagValue($pgto, 'vPag'), 2, ',', '.');
+        $linePlus = 0;
+        if (sizeof($venda->fatura) > 0) {
+            foreach ($venda->fatura as $f) {
+                $tipo = \App\Models\VendaCaixa::getTipoPagamento($f->forma_pagamento);
+                $valor = number_format($f->valor, 2, ',', '.');
                 $arpgto[] = [
                     'tipo' => $tipo,
                     'valor' => $valor
                 ];
+                $linePlus += 2;
             }
+
         } else {
-            $tipo = $this->pagType((int) $this->getTagValue($this->pag, 'tPag'));
-            $valor = number_format((float) $this->getTagValue($pgto, 'vPag'), 2, ',', '.');
+
+            $tipo = \App\Models\VendaCaixa::getTipoPagamento($venda->tipo_pagamento);
+            $valor = number_format($venda->valor_total, 2, ',', '.');
             $arpgto[] = [
                 'tipo' => $tipo,
                 'valor' => $valor
@@ -60,9 +63,40 @@ trait TraitBlocoV
         $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'L', false, '', false);
         $texto =  !empty($this->vTroco) ? number_format((float) $this->vTroco, 2, ',', '.') : '0,00';
         $y1 = $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'R', false, '', false);
+        $z += $y2;
 
+        $texto = "Data";
+        $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'L', false, '', false);
+        $texto = \Carbon\Carbon::parse($venda->created_at)->format('d/m/Y H:i:s');
+        $y1 = $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'R', false, '', false);
+        $y += 2;
 
-        $this->pdf->dashedHLine($this->margem, $this->bloco5H+$y, $this->wPrint, 0.1, 30);
+        $z += $y2;
+        $texto = "Código da venda";
+        $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'L', false, '', false);
+        $texto = $venda->id;
+        $y1 = $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'R', false, '', false);
+        $y += 2;
+
+        if($this->venda->vendedor()){
+            $z += $y2;
+            $texto = "Vendedor";
+            $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'L', false, '', false);
+            $texto = $this->venda->vendedor();
+            $y1 = $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'R', false, '', false);
+            $y += 2;
+        }
+
+        if($this->venda->comissaoAssessor){
+            $z += $y2;
+            $texto = "Vendedor";
+            $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'L', false, '', false);
+            $texto = "Assessor " . $this->venda->comissaoAssessor->assessor->razao_social;
+            $y1 = $this->pdf->textBox($this->margem, $z, $this->wPrint, 3, $texto, $aFont, 'T', 'R', false, '', false);
+            $y += 2;
+        }
+
+        $this->pdf->dashedHLine($this->margem, $this->bloco5H+$y+$linePlus, $this->wPrint, 0.1, 30);
         return $this->bloco5H + $y;
     }
 
@@ -89,9 +123,13 @@ trait TraitBlocoV
         return $lista[$type];
     }
 
-    protected function calculateHeightPag()
+    protected function calculateHeightPag($fatura = null)
     {
-        $n = $this->pag->length > 0 ? $this->pag->length : 1;
+
+        $n = 1;
+        if($fatura != null && sizeof($fatura) > 1){
+            $n = sizeof($fatura);
+        }
         $height = 4 + (2.4 * $n) + 3;
         return $height;
     }

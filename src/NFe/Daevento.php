@@ -93,10 +93,14 @@ class Daevento extends DaCommon
      * Dados brutos do PDF
      * @return string
      */
-    public function render($logo = null)
-    {
+    public function render(
+        $logo = null,
+        $orientacao = 'P',
+        $papel = 'A4',
+        $logoAlign = 'C'
+    ) {
         if (empty($this->pdf)) {
-            $this->monta($logo);
+            $this->monta($logo, $orientacao, $papel, $logoAlign);
         }
         return $this->pdf->getPdf();
     }
@@ -112,7 +116,7 @@ class Daevento extends DaCommon
         $this->rinfEvento = $this->retEvento->getElementsByTagName("infEvento")->item(0);
         $this->tpEvento = $this->infEvento->getElementsByTagName("tpEvento")->item(0)->nodeValue;
         if (!in_array($this->tpEvento, ['110110','110111'])) {
-            $this->errMsg = 'Evento não implementado ' . $this->tpEvento . ' !!';
+            $this->errMsg = 'Evento não implementado ' . $tpEvento . ' !!';
             $this->errStatus = true;
             return false;
         }
@@ -123,7 +127,6 @@ class Daevento extends DaCommon
         $this->cOrgao = $this->infEvento->getElementsByTagName("cOrgao")->item(0)->nodeValue;
         $this->xCorrecao = $this->infEvento->getElementsByTagName("xCorrecao")->item(0);
         $this->xCorrecao = (empty($this->xCorrecao) ? '' : $this->xCorrecao->nodeValue);
-        $this->xCorrecao = str_replace(';', ";\n", $this->xCorrecao);
         $this->xCondUso = $this->infEvento->getElementsByTagName("xCondUso")->item(0);
         $this->xCondUso = (empty($this->xCondUso) ? '' : $this->xCondUso->nodeValue);
         $this->xJust = $this->infEvento->getElementsByTagName("xJust")->item(0);
@@ -182,7 +185,7 @@ class Daevento extends DaCommon
             // posição inicial do relatorio
             $xInic = 5;
             $yInic = 5;
-            if ($this->papel == 'A4') { // A4 210x297mm
+            if ($papel == 'A4') { // A4 210x297mm
                 $maxH = 210;
                 $maxW = 297;
             }
@@ -365,12 +368,11 @@ class Daevento extends DaCommon
             'style' => ''
         );
         $this->pdf->textBox($x, $y + 15, $w2, 8, $texto, $aFont, 'T', 'L', 0, '');
-        $texto = 'Criado em : ' . \DateTime::createFromFormat("Y-m-d\TH:i:sP", $this->dhEvento)->format('d/m/Y H:i:s');
+        $tsHora = $this->toTimestamp($this->dhEvento);
+        $texto = 'Criado em : ' . date('d/m/Y   H:i:s', $tsHora);
         $this->pdf->textBox($x, $y + 20, $w2, 8, $texto, $aFont, 'T', 'L', 0, '');
-        $texto = 'Prococolo: '
-            . $this->nProt
-            . ' - Registrado em: '
-            . \DateTime::createFromFormat("Y-m-d\TH:i:sP", $this->dhRegEvento)->format('d/m/Y H:i:s');
+        $tsHora = $this->toTimestamp($this->dhRegEvento);
+        $texto = 'Prococolo: ' . $this->nProt . '  -  Registrado na SEFAZ em: ' . date('d/m/Y   H:i:s', $tsHora);
         $this->pdf->textBox($x, $y + 25, $w2, 8, $texto, $aFont, 'T', 'L', 0, '');
         // ####################################################
         $x = $oldX;

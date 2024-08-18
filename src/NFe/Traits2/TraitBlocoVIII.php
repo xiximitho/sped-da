@@ -1,5 +1,5 @@
 <?php
-namespace NFePHP\DA\NFe\Traits;
+namespace NFePHP\DA\NFe\Traits2;
 
 use Com\Tecnick\Barcode\Barcode;
 

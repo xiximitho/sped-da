@@ -1,31 +1,35 @@
 <?php
 
-namespace NFePHP\DA\NFe\Traits;
+namespace NFePHP\DA\NFe\Traits2;
 
 /**
  * Bloco cabecalho com a identificação e logo do emitente
  */
 trait TraitBlocoI
 {
-    protected function blocoI()
+    protected function blocoI($config)
     {
+
         //$this->bloco1H = 18;
         $y = $this->margem;
         //$aFont = ['font'=> $this->fontePadrao, 'size' => 7, 'style' => ''];
         //$this->pdf->textBox($this->margem, $y, $this->wPrint, $this->bloco1H, '', $aFont, 'T', 'C', true, '', false);
-        $emitRazao = $this->getTagValue($this->emit, "xNome");
-        $xFant = $this->getTagValue($this->emit, "xFant");
-        $emitCnpj = $this->getTagValue($this->emit, "CNPJ");
-        $emitIE = $this->getTagValue($this->emit, "IE");
+        $emitRazao = $config->razao_social;
+        $xFant = $config->nome_fantasia;
+        $emitCnpj = $config->cnpj;
+        $emitCnpj = str_replace(" ", "", $emitCnpj);
+        $emitIE = $config->ie;
         $emitCnpj = $this->formatField($emitCnpj, "###.###.###/####-##");
-        $emitLgr = $this->getTagValue($this->enderEmit, "xLgr");
-        $emitNro = $this->getTagValue($this->enderEmit, "nro");
-        $emitBairro = $this->getTagValue($this->enderEmit, "xBairro");
-        $emitMun = $this->getTagValue($this->enderEmit, "xMun");
-        $emitUF = $this->getTagValue($this->enderEmit, "UF");
+        $emitLgr = $config->logradouro;
+        $emitNro = $config->numero;
+        $emitBairro = $config->bairro;
+        $emitMun = $config->municipio;
+        $emitUF = $config->UF;
         $h = 0;
         $maxHimg = $this->bloco1H - 4;
+
         if (!empty($this->logomarca)) {
+
             $xImg = $this->margem;
             $yImg = $this->margem + 1;
             $logoInfo = getimagesize($this->logomarca);
@@ -47,6 +51,7 @@ trait TraitBlocoI
             $alignH = 'C';
         }
         //COLOCA RAZÃO SOCIAL
+
         $aFont = ['font'=>$this->fontePadrao, 'size' => 8, 'style' => ''];
         $texto = "{$emitRazao}";
         $y += $this->pdf->textBox(
@@ -80,6 +85,7 @@ trait TraitBlocoI
         if ($this->pdf->fontSizePt < 8) {
             $aFont = ['font'=>$this->fontePadrao, 'size' => $this->pdf->fontSizePt, 'style' => ''];
         }
+
         $texto = "CNPJ: {$emitCnpj} IE: {$emitIE}";
         $y += $this->pdf->textBox($xRs+2, $y, $wRs-2, 3, $texto, $aFont, 'T', $alignH, false, '', true);
         $texto = $emitLgr . ", " . $emitNro;

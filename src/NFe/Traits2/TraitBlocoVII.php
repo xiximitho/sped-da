@@ -1,5 +1,5 @@
 <?php
-namespace NFePHP\DA\NFe\Traits;
+namespace NFePHP\DA\NFe\Traits2;
 
 /**
  * Bloco VII informações do consumidor e dados da NFCe
@@ -8,6 +8,7 @@ trait TraitBlocoVII
 {
     protected function blocoVII($y)
     {
+
         $cnpj = $this->getTagValue($this->dest, "CNPJ");
         $cpf = $this->getTagValue($this->dest, "CPF");
         $nome = $this->getTagValue($this->dest, "xNome");
@@ -58,25 +59,27 @@ trait TraitBlocoVII
                 false
             );
         
-            $y1 += 2*$yPlus;
-            $num = str_pad($this->getTagValue($this->ide, "nNF"), 9, '0', STR_PAD_LEFT);
-            $serie = str_pad($this->getTagValue($this->ide, "serie"), 3, '0', STR_PAD_LEFT);
-            $data = (new \DateTime($this->getTagValue($this->ide, "dhEmi")))->format('d/m/Y H:i:s');
-            $texto = "NFCe n. {$num} Série {$serie} {$data}";
-            $aFont = ['font'=> $this->fontePadrao, 'size' => 8, 'style' => 'B'];
-            $y2 = $this->pdf->textBox(
-                $this->margem,
-                $y+$y1,
-                $this->wPrint,
-                4,
-                $texto,
-                $aFont,
-                'T',
-                'C',
-                false,
-                '',
-                true
-            );
+            // $y1 += 2*$yPlus;
+            // $num = str_pad($this->getTagValue($this->ide, "nNF"), 9, '0', STR_PAD_LEFT);
+            // $serie = str_pad($this->getTagValue($this->ide, "serie"), 3, '0', STR_PAD_LEFT);
+            // $data = (new \DateTime($this->getTagValue($this->ide, "dhEmi")))->format('d/m/Y H:i:s');
+            // $texto = "NFCe n. {$num} Série {$serie} {$data}";
+            // $aFont = ['font'=> $this->fontePadrao, 'size' => 8, 'style' => 'B'];
+            // $y2 = $this->pdf->textBox(
+            //     $this->margem,
+            //     $y+$y1,
+            //     $this->wPrint,
+            //     4,
+            //     $texto,
+            //     $aFont,
+            //     'T',
+            //     'C',
+            //     false,
+            //     '',
+            //     true
+            // );
+
+            
 
             $texto = $this->via;
             $y3 = $this->pdf->textBox(
